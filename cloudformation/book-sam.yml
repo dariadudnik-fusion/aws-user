@@ -1,0 +1,106 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31 #https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification.html
+Description: Lambda functions and serverless components for Inside Real Estate - holp-property
+
+Parameters:
+
+  #DeploymentArtifactsS3Bucket:
+  #  Description: S3 bucket where deployment artifacts are stored (code, config, OpenAPI definitions, etc.)
+  #  Type: String
+  #  Default: deployment-artifacts-865045747820-us-east-1
+
+  CommonComponentsStackName:
+    Description: "Name of CloudFormation stack where common components are deployed"
+    ConstraintDescription: must be provided
+    Type: String
+
+  CommitId:
+    Description: BitBucket CommitId
+    Type: String
+    Default: test
+
+  Stage:
+    Description: Name of the environment name (i.e. staging, prod, etc.)
+    Type: String
+    AllowedValues: [dev, qa, uat, uat-keyes, staging, prod]
+
+Conditions:
+  IsNodeDev: !Or [!Equals [!Ref Stage, 'dev'],!Equals [!Ref Stage, 'qa'],!Equals [!Ref Stage, 'uat'],!Equals [!Ref Stage, 'uat-keyes']] #TODO: confirm if staging will be considered "development" or "production" for NodeJS
+
+Globals:
+  Function:
+    Timeout: 30 #API Gateway max timeout is 30s and it cannot be increased
+    Runtime: nodejs14.x
+    MemorySize: 2048
+    VpcConfig:
+      SecurityGroupIds:
+        -
+          Fn::ImportValue:
+            !Sub "${CommonComponentsStackName}-LambdaSecurityGroup"
+      SubnetIds:
+        -
+          Fn::ImportValue:
+            !Sub "${CommonComponentsStackName}-SubnetPrivateA"
+        -
+          Fn::ImportValue:
+            !Sub "${CommonComponentsStackName}-SubnetPrivateB"
+    Tags:
+      commitId: !Ref CommitId
+      environment: !Ref Stage
+    Environment:
+      Variables:
+        ATTOM_SECRET_NAME: !Sub "/holp/${Stage}/atom_data_keys"
+        DATABASE_CONNECTION_SECRET: !Sub "/holp/${Stage}/nodeConnectDB"
+        NODE_ENV: !If [IsNodeDev, "development", "production"]
+        REGION: !Ref "AWS::Region"
+        GET_CACHE_FUNCTION_NAME: !Sub "holp-cache-${Stage}-getCache"
+        PUBLISH_EVENT_SNS_FUNCTION_NAME: !Sub "holp-cache-${Stage}-publishSNSEvent"
+        TENANT_KEYS_DDB_TABLE:
+          Fn::ImportValue:
+            !Sub "${CommonComponentsStackName}-TenantKeysTableName"
+
+Resources:
+
+  #GetPropertyById
+  GetPropertyByIdFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-getPropertyById'
+      CodeUri: ../
+      Handler: lambdas/indexGetPropertyById.handler
+      Role:
+        Fn::ImportValue:
+          !Sub "${CommonComponentsStackName}-LambdaExecutionRoleArn"
+      #Policies:
+      #  - Version: '2012-10-17'
+      #    Statement:
+      #      - Effect: Allow
+      #        Action:
+      #          - secretsmanager:Get*
+      #          - secretsmanager:List*
+      #          - kms:List*
+      #          - kms:Describe*
+      #          - lambda:Invoke*
+      #        Resource: '*'
+
+  #GetPropertyByAddress
+  GetPropertyByAddressFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-getPropertyByAddress'
+      CodeUri: ../
+      Handler: lambdas/indexPropertyByAddress.handler
+      Role:
+        Fn::ImportValue:
+          !Sub "${CommonComponentsStackName}-LambdaExecutionRoleArn"
+
+  #UpdatePropertyById
+  UpdatePropertyByIdFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub '${AWS::StackName}-updatePropertyById'
+      CodeUri: ../
+      Handler: lambdas/indexUpdateProperty.handler
+      Role:
+        Fn::ImportValue:
+          !Sub "${CommonComponentsStackName}-LambdaExecutionRoleArn"

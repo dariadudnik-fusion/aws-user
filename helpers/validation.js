@@ -1,0 +1,4 @@
+exports.validateMethod = (method, type) => {
+
+  
+}
