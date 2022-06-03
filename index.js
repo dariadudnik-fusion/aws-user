@@ -4,9 +4,10 @@ const { validateMethod } = require('./helpers/validation')
 
 exports.handler = async (event) => {
     try {
-        const { pathParameters, httpMethod } = event;
-        const id = pathParameters.userId;
-        validateMethod(httpMethod, "GET")
+        const { pathParameters, requestContext } = event;
+        const httpMethod = requestContext.http.method;
+        const id = pathParameters.id;
+        validateMethod(httpMethod, "GET");
 
         const result = await getBooksById(id);
 

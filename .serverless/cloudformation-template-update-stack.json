@@ -207,7 +207,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/aws-book-api/dev/1654266346560-2022-06-03T14:25:46.560Z/aws-book-api.zip"
+          "S3Key": "serverless/aws-book-api/dev/1654270061605-2022-06-03T15:27:41.605Z/aws-book-api.zip"
         },
         "Handler": "s_get_book_list.handler",
         "Runtime": "nodejs14.x",
@@ -225,14 +225,14 @@
         "GetDashbookDashlistLogGroup"
       ]
     },
-    "GetDashbookDashlistLambdaVersionwpnSQRJfToNGAocsViXTzzbwQ84QDbL9WixtoY1g4": {
+    "GetDashbookDashlistLambdaVersioniYzN6SMub3jJE6jP8UOp6lYj2mdipU1cNC1zWRmlvhE": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "GetDashbookDashlistLambdaFunction"
         },
-        "CodeSha256": "bd1S0qZ11lHLomhZ7/NCc5Mwn+46bGMBqP08iNUH+1w="
+        "CodeSha256": "cjLwqEA4tY19iOI0mkip8r7cSM0wWT8cYSZTPcx7S0M="
       }
     },
     "HttpApi": {
@@ -325,13 +325,13 @@
         "TimeoutInMillis": 6500
       }
     },
-    "HttpApiRouteGet": {
+    "HttpApiRouteGetBooksIdVar": {
       "Type": "AWS::ApiGatewayV2::Route",
       "Properties": {
         "ApiId": {
           "Ref": "HttpApi"
         },
-        "RouteKey": "GET /",
+        "RouteKey": "GET /books/{id}",
         "Target": {
           "Fn::Join": [
             "/",
@@ -390,7 +390,7 @@
     "GetDashbookDashlistLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "GetDashbookDashlistLambdaVersionwpnSQRJfToNGAocsViXTzzbwQ84QDbL9WixtoY1g4"
+        "Ref": "GetDashbookDashlistLambdaVersioniYzN6SMub3jJE6jP8UOp6lYj2mdipU1cNC1zWRmlvhE"
       },
       "Export": {
         "Name": "sls-aws-book-api-dev-GetDashbookDashlistLambdaFunctionQualifiedArn"

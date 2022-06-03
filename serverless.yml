@@ -12,5 +12,5 @@ functions:
     handler: index.handler
     events:
       - httpApi:
-          path: /
+          path: /books/{id}
           method: get
