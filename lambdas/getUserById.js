@@ -1,6 +1,6 @@
-const { responseBuilder, errorBuilder } = require("./helpers/response.js");
-const { getBooksById } = require("./data/getBooksById");
-const { validateMethod } = require('./helpers/validation')
+const { responseBuilder, errorBuilder } = require("../helpers/response");
+const { getUserById } = require("../data/getUserById");
+const { validateMethod } = require('../helpers/validation');
 
 exports.handler = async (event) => {
     try {
@@ -9,10 +9,13 @@ exports.handler = async (event) => {
         const id = pathParameters.id;
         validateMethod(httpMethod, "GET");
 
-        const result = await getBooksById(id);
+        const list = await getUserById(id);
 
-        return responseBuilder("200", result);
+        return responseBuilder("200", list);
     } catch (error) {
         return errorBuilder(error);
     }
 };
+
+
+
